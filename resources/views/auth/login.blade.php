@@ -48,7 +48,7 @@
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyCp6DYZt1zT-qzdx6SZ5H5D9EZLme5kGE0",
-    authDomain: "dermascanai-2d7a1.firebaseapp.com",
+    authDomain: "dermascan-web-admin.onrender.com",
     databaseURL: "https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "dermascanai-2d7a1",
     storageBucket: "dermascanai-2d7a1.firebasestorage.app",
