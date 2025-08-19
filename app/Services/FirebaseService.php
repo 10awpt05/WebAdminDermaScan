@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use Kreait\Firebase\Factory;
+use Kreait\Firebase\Auth;
+use Kreait\Firebase\Database;
 
 class FirebaseService
 {
+    protected $auth;
     protected $database;
 
     public function __construct()
@@ -14,9 +17,39 @@ class FirebaseService
             ->withServiceAccount(storage_path('app/firebase/dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json'))
             ->withDatabaseUri('https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app/');
 
+        $this->auth = $factory->createAuth();
         $this->database = $factory->createDatabase();
     }
 
+    /** ---------------- AUTH ---------------- */
+    public function getAuth()
+    {
+        return $this->auth;
+    }
+
+    public function signInWithEmailPassword($email, $password)
+    {
+        return $this->auth->signInWithEmailAndPassword($email, $password);
+    }
+
+    public function createDefaultUser()
+    {
+        return $this->auth->createUser([
+            'email' => 'admin@example.com',
+            'emailVerified' => false,
+            'password' => '123123',
+            'displayName' => 'Admin User',
+            'disabled' => false,
+        ]);
+    }
+
+    /** ---------------- DATABASE ---------------- */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+
+    /** ---------------- USER MANAGEMENT ---------------- */
     public function getUnapprovedUsers()
     {
         $reference = $this->database->getReference('dermaInfo');
@@ -40,9 +73,32 @@ class FirebaseService
             'approved' => true
         ]);
     }
-    public function getDatabase()
+
+    /** ---------------- DAILY TIPS ---------------- */
+    public function getDailyTip($key)
     {
-        return $this->database;
+        return $this->database->getReference("dailyTips/{$key}")->getValue();
+    }
+
+    public function getDailyTips()
+    {
+        return $this->database->getReference("dailyTips")->getValue();
+    }
+
+
+    public function updateFullTip($key, array $data)
+    {
+        return $this->database->getReference("dailyTips/{$key}")->set($data);
+    }
+
+    public function deleteTip($key)
+    {
+        return $this->database->getReference("dailyTips/{$key}")->remove();
+    }
+    public function pushTip(array $data)
+    {
+        return $this->database->getReference("dailyTips")->push($data);
+        Log::debug('Firebase push result:', ['result' => $result->getKey()]);
     }
 
 }

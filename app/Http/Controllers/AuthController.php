@@ -9,7 +9,7 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return view('public.login');
     }
 
     public function login(Request $request)
@@ -21,7 +21,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended('/mainapp');
         }
 
         return back()->withErrors([
@@ -37,37 +37,41 @@ class AuthController extends Controller
 
         return redirect('/login');
     }
-    public function adminLogin(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]); 
+    // public function adminLogin(Request $request)
+    // {
+    //     $credentials = $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required',
+    //     ]); 
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            return redirect()->route('admin.dashboard', ['name' => $user->name]);;
-        }
+    //     if (Auth::attempt($credentials)) {
+    //         $user = Auth::user();
+    //         return redirect()->route('admin.dashboard', ['name' => $user->name]);;
+    //     }
 
-        return back()->withErrors(['email' => 'Invalid credentials']);
-    }
-    public function adminLogout(Request $request)
-    {
-        Auth::logout();
-        return redirect()->route('user.udashboard');
-    }
-    public function userDashboard()
-    {
-        $user = Auth::user();
+    //     return back()->withErrors(['email' => 'Invalid credentials']);
+    // }
 
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'You need to login first.');
-        }
+    
+    // public function adminLogout(Request $request)
+    // {
+    //     Auth::logout();
+    //     return redirect()->route('user.udashboard');
+    // }
 
-        $postCount = PostComment::where('user_id', $user->id)->count() ?? 0;
 
-        dd($postCount);
+    // public function userDashboard()
+    // {
+    //     $user = Auth::user();
 
-        return view('child.profile', compact('user', 'postCount'));
-    }
+    //     if (!$user) {
+    //         return redirect()->route('login')->with('error', 'You need to login first.');
+    //     }
+
+    //     $postCount = PostComment::where('user_id', $user->id)->count() ?? 0;
+
+    //     dd($postCount);
+
+    //     return view('child.profile', compact('user', 'postCount'));
+    // }
 }

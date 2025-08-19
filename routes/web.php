@@ -6,6 +6,20 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DiseaseController;
+use App\Http\Controllers\FirebaseAuthController;
+use App\Http\Controllers\DailyTipsController;
+use App\Http\Controllers\ScanReportController;
+
+Route::get('/admin/scan-reports', [ScanReportController::class, 'index'])->name('admin.scan-reports');
+
+Route::get('/admin/daily_tips', [DailyTipsController::class, 'adminView'])->name('admin.daily_tips');
+
+Route::get('/daily_tips', [DailyTipsController::class, 'retrieveTips']);
+Route::post('/daily_tips', [DailyTipsController::class, 'addTip']);
+Route::post('/daily_tips/{key}/edit', [DailyTipsController::class, 'editTip']);
+Route::post('/daily_tips/{key}/delete', [DailyTipsController::class, 'deleteTip']);
+
+
 
 Route::get('/disease', [DiseaseController::class, 'index'])->name('disease.index');
 Route::post('/disease', [DiseaseController::class, 'store'])->name('disease.store');
@@ -17,11 +31,13 @@ Route::get('/admin/derma-users', [AdminController::class, 'showDermaUsers'])->na
 Route::post('/admin/verify-user/{uid}', [AdminController::class, 'verifyUser'])->name('admin.verify-user');
 Route::get('/admin/delete-user/{uid}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
 Route::post('/admin/reject-user/{uid}', [AdminController::class, 'rejectUser'])->name('admin.reject-user');
+Route::get('/admin/user-image/{uid}/{type}', [AdminController::class, 'getImage'])->name('admin.get-image');
+
     
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'adminLogin']);
-Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/', [FirebaseAuthController::class, 'login'])->name('login.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/blog-posts', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog-posts/{postId}/edit', [BlogController::class, 'edit'])->name('blog.edit');
@@ -42,7 +58,8 @@ Route::get('/user/edit/{id}', [FirebaseController::class, 'editUser'])->name('us
 Route::post('/user/update/{id}', [FirebaseController::class, 'updateUser'])->name('user.update');
 Route::get('/user/delete/{id}', [FirebaseController::class, 'deleteUser'])->name('user.delete');
 
-Route::get('/', function () {
-    return view('mainapp');
-})->name('mainapp');
 
+
+Route::get('/mainapp', function () {
+    return view('mainapp');
+})->middleware(App\Http\Middleware\FirebaseAuth::class);

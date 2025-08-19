@@ -9,8 +9,14 @@ class FirebaseAuth
 {
     public function handle(Request $request, Closure $next)
     {
+        // if (!session()->has('firebase_user')) {
+        //     return redirect()->route('firebase.login');
+        // }
+
+        // return $next($request);
+
         if (!session()->has('firebase_user')) {
-            return redirect()->route('firebase.login');
+            return redirect()->route('login')->withErrors(['You must be logged in.']);
         }
 
         return $next($request);
