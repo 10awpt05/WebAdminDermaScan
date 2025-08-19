@@ -113,7 +113,8 @@
 
 <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
 
 
 <script>
@@ -140,6 +141,27 @@
             });
         });
     });
+    const firebaseConfig = {
+
+  apiKey: "AIzaSyCp6DYZt1zT-qzdx6SZ5H5D9EZLme5kGE0",
+
+  authDomain: "dermascanai-2d7a1.firebaseapp.com",
+
+  databaseURL: "https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId: "dermascanai-2d7a1",
+
+  storageBucket: "dermascanai-2d7a1.firebasestorage.app",
+
+  messagingSenderId: "889758966173",
+
+  appId: "1:889758966173:web:e6f0c3372aa55ae1f30f74",
+
+  measurementId: "G-C8RRXYMLLT"
+
+};
+
+firebase.initializeApp(firebaseConfig);
 </script>
 
 </body>
