@@ -32,4 +32,4 @@ EXPOSE 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
 # Default command: clear caches and start Apache
-CMD sh -c "php /var/www/html/artisan config:clear && php /var/www/html/artisan cache:clear && php /var/www/html/artisan route:clear && php /var/www/html/artisan view:clear && exec /usr/local/bin/apache2-foreground"
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
