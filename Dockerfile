@@ -4,7 +4,7 @@ FROM php:8.2-apache
 # Set working directory
 WORKDIR /var/www/html
 
-# Install system dependencies & PHP extensions
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,9 +13,12 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libpq-dev \
     curl \
-    && docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql curl zip \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Install PHP extensions
+RUN docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql zip
+RUN docker-php-ext-enable mbstring bcmath xml pdo pdo_pgsql zip
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -29,7 +32,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy app files
+# Copy application code
 COPY . /var/www/html
 
 # Ensure storage and cache directories are writable
@@ -39,7 +42,7 @@ RUN mkdir -p bootstrap/cache storage/logs storage/framework/cache/data storage/f
 # Expose port 80
 EXPOSE 80
 
-# Run package discovery (optional, can be done at runtime)
+# Run Laravel package discovery
 RUN php artisan package:discover
 
 # Start Apache
