@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
 {
     if ($this->app->environment('production')) {
     \URL::forceScheme('https');
-    \Illuminate\Support\Facades\Session::setCookieDomain(env('SESSION_DOMAIN'));
+   
 }
 
 }
