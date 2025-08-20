@@ -5,9 +5,9 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev libjpeg62-turbo-dev libpng-dev \
     && docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-# Enable Apache mod_rewrite (important for Laravel routes)
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
 # Install Composer
@@ -16,13 +16,13 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files into the container
+# Copy project files
 COPY . .
 
-# Install PHP dependencies for Laravel
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set correct permissions for Laravel storage and cache
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose Render’s default port
@@ -31,9 +31,5 @@ EXPOSE 10000
 # Update Apache config to use port 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
-# Default command: clear caches at runtime, then start Apache
-CMD php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    apache2-foreground
+# Start Apache
+CMD apache2-foreground
