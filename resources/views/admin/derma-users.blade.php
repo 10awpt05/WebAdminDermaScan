@@ -40,4 +40,23 @@
             @include('admin.partials.user-table', ['users' => $verifiedUsers])
         </div>
     </div>
+
+ <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCp6DYZt1zT-qzdx6SZ5H5D9EZLme5kGE0",
+            authDomain: "dermascan-web-admin.onrender.com",
+            databaseURL: "https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "dermascanai-2d7a1",
+            storageBucket: "dermascanai-2d7a1.firebasestorage.app",
+            messagingSenderId: "889758966173",
+            appId: "1:889758966173:web:c1523dc49921e882f30f74",
+            measurementId: "G-QBF39K0J8V"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
 @endsection
