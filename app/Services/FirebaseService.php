@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class FirebaseService
 {
-     protected $auth;
+    protected $auth;
     protected $database;
 
     public function __construct()
@@ -21,12 +21,8 @@ class FirebaseService
             ->withServiceAccount($credentials)
             ->withDatabaseUri($databaseUrl);
 
+        $this->auth = $factory->createAuth();
         $this->database = $factory->createDatabase();
-    }
-
-    public function getDatabase()
-    {
-        return $this->database;
     }
 
     /** ---------------- AUTH ---------------- */
