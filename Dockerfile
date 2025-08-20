@@ -1,49 +1,36 @@
-# Use official PHP image with Apache
+# Use the official PHP image with Apache
 FROM php:8.2-apache
+
+# Install system dependencies and PHP extensions required by Laravel
+RUN apt-get update && apt-get install -y \
+    unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Install system dependencies & PHP extensions
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    curl \
-    && docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql curl zip \
-    && a2enmod rewrite \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create storage and bootstrap/cache directories with writable permissions
-RUN mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs \
-    && chmod -R 777 bootstrap/cache storage
-
-# Copy composer files first (for Docker layer caching)
-COPY composer.lock composer.json /var/www/html/
-
-# Install Composer (from official Composer image)
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Copy .env example so Laravel can run during build
-COPY .env.example .env
+# Copy project files
+COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy the rest of the app files
-COPY . /var/www/html
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Run Laravel package discovery
-RUN php artisan package:discover
+# Expose Render’s default port
+EXPOSE 10000
 
-# Ensure storage and cache directories remain writable
-RUN chmod -R 777 bootstrap/cache storage
-
-# Expose port 80
-EXPOSE 80
+# Update Apache config to use port 10000 and set DocumentRoot to /public
+RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf && \
+    sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
 # Start Apache
 CMD ["apache2-foreground"]
