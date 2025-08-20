@@ -1,39 +1,31 @@
 <?php
 
-namespace App\Services;
+namespace App\Providers;
 
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\Auth;
-use Kreait\Firebase\Database;
+use Illuminate\Support\ServiceProvider;
+use App\Services\FirebaseService;
 
-class FirebaseService
+class AppServiceProvider extends ServiceProvider
 {
-    protected $firebase;
-
-    public function __construct()
+    /**
+     * Register any application services.
+     */
+    public function register(): void
     {
-        // Replace escaped newlines with real newlines
-        $firebaseKey = str_replace('\\n', "\n", env('FIREBASE_PRIVATE_KEY'));
-
-        // Initialize Firebase
-        $this->firebase = (new Factory())
-            ->withServiceAccount([
-                'type' => 'service_account',
-                'project_id' => env('FIREBASE_PROJECT_ID'),
-                'private_key' => $firebaseKey,
-                'client_email' => env('FIREBASE_CLIENT_EMAIL'),
-            ])
-            ->withDatabaseUri(env('FIREBASE_DATABASE_URL'))
-            ->create();
+        $this->app->singleton(FirebaseService::class, function ($app) {
+            return new FirebaseService();
+        });
     }
 
-    public function auth(): Auth
-    {
-        return $this->firebase->getAuth();
-    }
+    /**
+     * Bootstrap any application services.
+     */
+  public function boot()
+{
+    if ($this->app->environment('production')) {
+    \URL::forceScheme('https');
+   
+}
 
-    public function database(): Database
-    {
-        return $this->firebase->getDatabase();
-    }
+}
 }
