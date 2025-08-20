@@ -34,8 +34,6 @@ EXPOSE 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
 # Start Apache in foreground
-CMD ["apache2-foreground"]
+CMD sh -c "php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && exec apache2-foreground"
 
-# At the very end of your Dockerfile
-CMD sh -c "php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear && apache2-foreground"
 
