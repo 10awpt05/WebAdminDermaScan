@@ -3,24 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Kreait\Firebase\Factory; // ✅ You were missing this import
-use Kreait\Firebase\Database;
-use Illuminate\Support\Str;
-
-
-
+use App\Services\FirebaseService;
 
 class DiseaseController extends Controller
 {
     protected $database;
 
-    public function __construct()
+    public function __construct(FirebaseService $firebase)
     {
-        $factory = (new Factory)
-            ->withServiceAccount(base_path('dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json'))
-            ->withDatabaseUri('https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app/');
-
-        $this->database = $factory->createDatabase();
+        $this->database = $firebase->getDatabase();
     }
 
     public function index()
@@ -46,12 +37,11 @@ class DiseaseController extends Controller
             'des' => $data['des'],
             'prev' => $data['prev'],
             'rem' => $data['rem'],
-            'creditURL' => $data['creditURL'],
+            'creditURL' => $data['creditURL'] ?? '',
         ]);
 
         return redirect()->route('disease.index')->with('success', 'Disease added successfully!');
     }
-
 
     public function update(Request $request, $name)
     {
@@ -72,13 +62,12 @@ class DiseaseController extends Controller
         ]);
 
         return redirect()->route('disease.index')->with('success', 'Disease updated successfully!');
-        }
+    }
 
-        public function destroy($name)
-        {
-            $this->database->getReference('disease/' . $name)->remove();
+    public function destroy($name)
+    {
+        $this->database->getReference('disease/' . $name)->remove();
 
-            return redirect()->route('disease.index')->with('success', 'Disease deleted successfully!');
-        }
-
+        return redirect()->route('disease.index')->with('success', 'Disease deleted successfully!');
+    }
 }
