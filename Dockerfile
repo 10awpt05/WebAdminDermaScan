@@ -4,7 +4,7 @@ FROM php:8.2-apache
 # Set working directory
 WORKDIR /var/www/html
 
-# Install system dependencies
+# Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,37 +13,37 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libpq-dev \
     curl \
-    build-essential \
+    && docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql curl zip \
+    && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql zip
-RUN docker-php-ext-enable mbstring bcmath xml pdo pdo_pgsql zip
+# Create storage and bootstrap/cache directories with writable permissions
+RUN mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs \
+    && chmod -R 777 bootstrap/cache storage
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
-# Copy composer.lock and composer.json
+# Copy composer files first (for Docker layer caching)
 COPY composer.lock composer.json /var/www/html/
 
-# Install Composer
+# Install Composer (from official Composer image)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy .env example so Laravel can run during build
+COPY .env.example .env
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy application code
+# Copy the rest of the app files
 COPY . /var/www/html
-
-# Ensure storage and cache directories are writable
-RUN mkdir -p bootstrap/cache storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views \
-    && chmod -R 777 bootstrap/cache storage
-
-# Expose port 80
-EXPOSE 80
 
 # Run Laravel package discovery
 RUN php artisan package:discover
+
+# Ensure storage and cache directories remain writable
+RUN chmod -R 777 bootstrap/cache storage
+
+# Expose port 80
+EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
