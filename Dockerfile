@@ -1,4 +1,4 @@
-# Use the official PHP image with Apache (better for Laravel than CLI)
+# Use the official PHP image with Apache
 FROM php:8.2-apache
 
 # Install system dependencies and PHP extensions required by Laravel
@@ -28,9 +28,8 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose Render’s default port
 EXPOSE 10000
 
-# Update Apache port to 10000
+# Update Apache to listen on Render’s port
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
-# Start Apache
-CMD ["php", "-S", "0.0.0.0:10000", "-t", "public"]
-
+# Start Apache (not PHP's dev server)
+CMD ["apache2-foreground"]
