@@ -6,15 +6,16 @@ WORKDIR /var/www/html
 
 # Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y \
-    php-mbstring \
-    php-bcmath \
-    php-xml \
-    php-pdo \
-    php-pgsql \
-    php-curl \
-    unzip \
     git \
+    unzip \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
+    curl \
+    && docker-php-ext-install mbstring bcmath xml pdo pdo_pgsql curl zip \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
