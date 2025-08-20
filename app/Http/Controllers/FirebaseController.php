@@ -2,24 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Kreait\Firebase\Factory;
-
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Session;
+use App\Services\FirebaseService;
 
 class FirebaseController extends Controller
 {
     protected $database;
+    protected $auth;
 
-    public function __construct()
+    public function __construct(FirebaseService $firebase)
     {
-        $factory = (new Factory)
-            ->withServiceAccount(base_path('dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json'))
-            ->withDatabaseUri('https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app/');
-
-        $this->database = $factory->createDatabase();
-        $this->auth = $factory->createAuth();
+        $this->database = $firebase->getDatabase();
+        $this->auth = $firebase->getAuth();
     }
 
     public function showUserInfo($id)
@@ -28,55 +24,26 @@ class FirebaseController extends Controller
         return view('users.show', compact('user'));
     }
 
+    public function listUsers(Request $request)
+    {
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 5;
 
-//     public function listUsers(Request $request)
-// {
-//     // Fetch the page number from the query parameter, default to 1
-//     $page = $request->query('page', 1);
+        $allUsers = $this->database->getReference('userInfo')->getValue() ?? [];
 
-//     // Calculate the starting point (index) based on the current page
-//     $startIndex = ($page - 1) * 5;
+        // Convert associative array to indexed array with keys preserved
+        $allUsers = collect($allUsers)->map(function ($user, $key) {
+            $user['id'] = $key;
+            return $user;
+        })->values();
 
-//     // Fetch users based on the current page, showing 10 users per page
-//     $users = $this->database->getReference('userInfo')
-//                             ->orderByKey()
-//                             ->startAt((string) $startIndex)
-//                             ->limitToFirst(5)
-//                             ->getValue();
+        $currentItems = $allUsers->slice(($currentPage - 1) * $perPage, $perPage)->all();
 
-//     $totalUsers = $this->database->getReference('userInfo')->getSnapshot()->numChildren();
+        $paginatedUsers = new LengthAwarePaginator($currentItems, $allUsers->count(), $perPage);
+        $paginatedUsers->setPath(route('users.index'));
 
-//     $totalPages = ceil($totalUsers / 5);
-
-//     return view('userlist', compact('users', 'page', 'totalPages'));
-// }
-
-
-public function listUsers(Request $request)
-{
-    $currentPage = LengthAwarePaginator::resolveCurrentPage();
-    $perPage = 5;
-
-    $allUsers = $this->database->getReference('userInfo')
-                ->getValue() ?? [];
-
-    // Convert associative array to indexed array with keys preserved
-    $allUsers = collect($allUsers)->map(function ($user, $key) {
-        $user['id'] = $key;
-        return $user;
-    })->values();
-
-    $currentItems = $allUsers->slice(($currentPage - 1) * $perPage, $perPage)->all();
-
-    $paginatedUsers = new LengthAwarePaginator($currentItems, $allUsers->count(), $perPage);
-    $paginatedUsers->setPath(route('users.index'));
-
-    return view('userlist', ['users' => $paginatedUsers]);
-}
-
-    
-
-        
+        return view('userlist', ['users' => $paginatedUsers]);
+    }
 
     public function editUser($id)
     {
@@ -101,15 +68,16 @@ public function listUsers(Request $request)
         $this->database->getReference("userInfo/{$id}")->remove();
         return redirect()->route('user.list')->with('success', 'User deleted successfully!');
     }
+
     public function show($postId)
     {
         $post = $this->database->getReference('blogPosts/' . $postId)->getValue();
-    
+
         $comments = $this->database->getReference('comments')
                                    ->orderByChild('postId')
                                    ->equalTo($postId)
                                    ->getValue();
-    
+
         return view('blog.show', compact('post', 'comments'));
     }
 
@@ -128,7 +96,7 @@ public function listUsers(Request $request)
             $uid = $verifiedIdToken->claims()->get('sub');
             $user = $this->auth->getUser($uid);
 
-            // Store user info in session (this is just an example, adapt it to your needs)
+            // Store user info in session
             Session::put('firebase_user', [
                 'uid' => $user->uid,
                 'email' => $user->email,
@@ -147,10 +115,4 @@ public function listUsers(Request $request)
         Session::forget('firebase_user');
         return redirect('/firebase-login');
     }
-
-    // Other methods (e.g., showUserInfo, listUsers, etc.) here...
-
-
-
-
 }
