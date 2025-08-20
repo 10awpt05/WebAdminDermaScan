@@ -31,5 +31,11 @@ EXPOSE 10000
 # Update Apache config to use port 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
+# Clear Laravel caches during build
+RUN php artisan config:clear \
+    && php artisan cache:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
 # Default command: clear caches and start Apache
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
