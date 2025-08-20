@@ -5,6 +5,7 @@ namespace App\Services;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Database;
+use Illuminate\Support\Facades\Log;
 
 class FirebaseService
 {
@@ -13,9 +14,16 @@ class FirebaseService
 
     public function __construct()
     {
+        $serviceAccount = [
+            'type' => 'service_account',
+            'project_id' => env('FIREBASE_PROJECT_ID'),
+            'client_email' => env('FIREBASE_CLIENT_EMAIL'),
+            'private_key' => str_replace('\\n', "\n", env('FIREBASE_PRIVATE_KEY')),
+        ];
+
         $factory = (new Factory)
-            ->withServiceAccount(storage_path('app/firebase/dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json'))
-            ->withDatabaseUri('https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app/');
+            ->withServiceAccount($serviceAccount)
+            ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
 
         $this->auth = $factory->createAuth();
         $this->database = $factory->createDatabase();
@@ -85,7 +93,6 @@ class FirebaseService
         return $this->database->getReference("dailyTips")->getValue();
     }
 
-
     public function updateFullTip($key, array $data)
     {
         return $this->database->getReference("dailyTips/{$key}")->set($data);
@@ -95,10 +102,10 @@ class FirebaseService
     {
         return $this->database->getReference("dailyTips/{$key}")->remove();
     }
+
     public function pushTip(array $data)
     {
-        return $this->database->getReference("dailyTips")->push($data);
+        $result = $this->database->getReference("dailyTips")->push($data);
         Log::debug('Firebase push result:', ['result' => $result->getKey()]);
     }
-
 }
