@@ -4,19 +4,12 @@ use Kreait\Firebase\Factory;
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Firebase Admin SDK Credentials
-    |--------------------------------------------------------------------------
-    |
-    | Instead of referencing a file, we store the service account JSON in
-    | an environment variable and decode it here. This way no secrets
-    | are committed to git or baked into the Docker image.
-    |
-    */
-
-    'credentials' => json_decode(env('FIREBASE_CREDENTIALS_JSON'), true),
+    'credentials' => [
+        'type' => 'service_account',
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'client_email' => env('FIREBASE_CLIENT_EMAIL'),
+        'private_key' => str_replace("\\n", "\n", env('FIREBASE_PRIVATE_KEY')),
+    ],
 
     'database_url' => env('FIREBASE_DATABASE_URL'),
-
 ];
