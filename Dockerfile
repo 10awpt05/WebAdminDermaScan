@@ -19,6 +19,9 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Copy Firebase credentials (⚠️ insecure if in repo)
+COPY dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json /var/www/html/firebase-key.json
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
