@@ -3,19 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Kreait\Firebase\Factory;
+use App\Services\FirebaseService;
 
 class BlogController extends Controller
 {
     protected $database;
 
-    public function __construct()
+    public function __construct(FirebaseService $firebase)
     {
-        $factory = (new Factory)
-            ->withServiceAccount(base_path('dermascanai-2d7a1-firebase-adminsdk-fbsvc-be9d626095.json'))
-            ->withDatabaseUri('https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app/');
-
-        $this->database = $factory->createDatabase();
+        $this->database = $firebase->getDatabase();
     }
 
     public function index()
