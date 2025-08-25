@@ -4,9 +4,9 @@ FROM php:8.2-apache
 # Install system dependencies and PHP extensions required by Laravel
 RUN apt-get update && apt-get install -y \
     unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev \
-    libjpeg62-turbo-dev libpng-dev tzdata ntpdate \
+    libjpeg62-turbo-dev libpng-dev tzdata ntpdate-debian \
     && docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
@@ -24,7 +24,7 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
+# Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose Render’s default port
@@ -34,5 +34,5 @@ EXPOSE 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf && \
     sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
-# Sync time on container startup, then run Apache
-CMD ntpdate -s time.google.com || true && apache2-foreground
+# Start Apache (sync container time first)
+CMD ntpdate-debian || true && apache2-foreground
