@@ -2,12 +2,13 @@
 FROM php:8.2-apache
 
 # Install system dependencies and PHP extensions required by Laravel
+# Install system dependencies and PHP extensions required by Laravel
 RUN apt-get update && apt-get install -y \
-    unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev \
-    libjpeg62-turbo-dev libpng-dev tzdata \
+    unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev libjpeg62-turbo-dev libpng-dev tzdata ntpdate \
+    && ntpdate -s time.google.com \
     && docker-php-ext-configure gd --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -24,7 +25,7 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions for Laravel
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose Render’s default port
