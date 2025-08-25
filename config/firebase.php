@@ -3,6 +3,6 @@
 use Kreait\Firebase\Factory;
 
 return [
-    'credentials' => '/etc/secrets/firebase.json',
+    'credentials' => env('FIREBASE_CREDENTIALS', '/etc/secrets/firebase.json'),
     'database_url' => env('FIREBASE_DATABASE_URL'),
 ];
