@@ -2,8 +2,6 @@
 
 use Kreait\Firebase\Factory;
 
-<?php
-
 return [
 
     'default' => env('FIREBASE_PROJECT_ID'),
