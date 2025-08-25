@@ -34,15 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    'firebase' => [
-    'credentials' => [
-        'type' => 'service_account',
-        'project_id' => env('FIREBASE_PROJECT_ID'),
-        'client_email' => env('FIREBASE_CLIENT_EMAIL'),
-        'private_key' => str_replace("\\n", "\n", env('FIREBASE_PRIVATE_KEY')),
+   'firebase' => [
+        'credentials' => '/etc/secrets/firebase.json',
+        'database_url' => env('FIREBASE_DATABASE_URL'),
     ],
-    'database_url' => env('FIREBASE_DATABASE_URL'),
-],
+
 
 
 ];
