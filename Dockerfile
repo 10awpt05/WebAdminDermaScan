@@ -2,10 +2,13 @@
 FROM php:8.2-apache
 
 # Install system dependencies and PHP extensions required by Laravel
+# Install system dependencies and PHP extensions required by Laravel
 RUN apt-get update && apt-get install -y \
-    unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev libjpeg62-turbo-dev libpng-dev \
+    unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev libjpeg62-turbo-dev libpng-dev tzdata ntpdate \
+    && ntpdate -s time.google.com \
     && docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
