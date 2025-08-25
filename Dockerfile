@@ -4,7 +4,7 @@ FROM php:8.2-apache
 # Install system dependencies and PHP extensions required by Laravel
 RUN apt-get update && apt-get install -y \
     unzip git curl libpq-dev libonig-dev libxml2-dev zip libzip-dev \
-    libjpeg62-turbo-dev libpng-dev tzdata ntpdate-debian \
+    libjpeg62-turbo-dev libpng-dev tzdata \
     && docker-php-ext-configure gd --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip \
     && rm -rf /var/lib/apt/lists/*
@@ -34,5 +34,5 @@ EXPOSE 10000
 RUN sed -i 's/80/10000/' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf && \
     sed -i 's#/var/www/html#/var/www/html/public#' /etc/apache2/sites-available/000-default.conf
 
-# Start Apache (sync container time first)
-CMD ntpdate-debian || true && apache2-foreground
+# Start Apache
+CMD ["apache2-foreground"]
