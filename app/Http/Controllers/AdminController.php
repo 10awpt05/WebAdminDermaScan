@@ -58,13 +58,28 @@ class AdminController extends Controller
     //----------------Verify User-----------------
 
     public function verifyUser($uid)
-    {
-        $this->database->getReference("clinicInfo/{$uid}")->update([
-            'status' => 'verified',
-        ]);
+{
+    $this->database->getReference("clinicInfo/{$uid}")->update([
+        'status' => 'verified',
+    ]);
 
-        return redirect()->back()->with('success', 'User verified successfully.');
-    }
+    // Create a new notification
+    $notificationId = $this->database->getReference("notifications/{$uid}")->push()->getKey();
+    $notificationData = [
+        'notificationId' => $notificationId,
+        'fromUserId' => 'admin',
+        'toUserId' => $uid,
+        'type' => 'registration',
+        'message' => 'Your registration has been approved!',
+        'timestamp' => round(microtime(true) * 1000),
+        'isRead' => false,
+        'status' => 'verified'
+    ];
+    $this->database->getReference("notifications/{$uid}/{$notificationId}")->set($notificationData);
+
+    return redirect()->back()->with('success', 'User verified successfully.');
+}
+
 
     //----------------Delete User-----------------
 
@@ -87,32 +102,47 @@ class AdminController extends Controller
     // }
 
     public function rejectUser(Request $request, $uid)
-    {
-        $request->validate([
-            'reason' => 'required|string|max:1000',
-        ]);
+{
+    $request->validate([
+        'reason' => 'required|string|max:1000',
+    ]);
 
-        $reason = $request->input('reason');
-        $user = $this->database->getReference("clinicInfo/{$uid}")->getValue();
+    $reason = $request->input('reason');
+    $user = $this->database->getReference("clinicInfo/{$uid}")->getValue();
 
-        if (!$user || empty($user['email'])) {
-            return redirect()->back()->with('error', 'User email not found.');
-        }
-
-        // Update status and reason in Firebase
-        $this->database->getReference("clinicInfo/{$uid}")->update([
-            'status' => 'rejected',
-            'rejectionReason' => $reason,
-        ]);
-
-        // Send rejection email
-        Mail::send('emails.rejection', ['user' => $user, 'reason' => $reason], function ($message) use ($user) {
-            $message->to($user['email'])
-                    ->subject('Clinic Registration Rejected');
-        });
-
-        return redirect()->back()->with('success', 'User rejected and email sent.');
+    if (!$user || empty($user['email'])) {
+        return redirect()->back()->with('error', 'User email not found.');
     }
+
+    // Update status and reason in Firebase
+    $this->database->getReference("clinicInfo/{$uid}")->update([
+        'status' => 'rejected',
+        'rejectionReason' => $reason,
+    ]);
+
+    // Create a new notification
+    $notificationId = $this->database->getReference("notifications/{$uid}")->push()->getKey();
+    $notificationData = [
+        'notificationId' => $notificationId,
+        'fromUserId' => 'admin',
+        'toUserId' => $uid,
+        'type' => 'registration',
+        'message' => "Your registration was rejected. Reason: {$reason}",
+        'timestamp' => round(microtime(true) * 1000),
+        'isRead' => false,
+        'status' => 'rejected'
+    ];
+    $this->database->getReference("notifications/{$uid}/{$notificationId}")->set($notificationData);
+
+    // Send rejection email
+    Mail::send('emails.rejection', ['user' => $user, 'reason' => $reason], function ($message) use ($user) {
+        $message->to($user['email'])
+                ->subject('Clinic Registration Rejected');
+    });
+
+    return redirect()->back()->with('success', 'User rejected, email and notification sent.');
+}
+
 
 
         //----------------Get User Image-----------------
