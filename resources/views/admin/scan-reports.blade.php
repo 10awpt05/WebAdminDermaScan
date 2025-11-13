@@ -9,29 +9,43 @@
         <thead class="table-dark">
             <tr>
                 <th>Reported By</th>
+                <th>Condition</th>
                 <th>View Report</th>
                 <th>Timestamp</th>
             </tr>
         </thead>
         <tbody>
             @forelse($scanReports as $reportId => $report)
+                @php
+                    $scanResult = $report['scanResult'] ?? [];
+                    $userName = $scanResult['userName'] ?? 'Unknown';
+                    $condition = $scanResult['condition'] ?? 'No condition';
+                    $imageBase64 = $scanResult['imageBase64'] ?? '';
+                    $remedy = $scanResult['remedy'] ?? '';
+                    $timestamp = $scanResult['timestamp'] ?? '';
+                    $message = $report['message'] ?? 'No message provided';
+                @endphp
+
                 <tr>
-                    <td>{{ $report['userName'] ?? 'Unknown' }}</td>
+                    <td>{{ $userName }}</td>
+                    <td>{{ $condition }}</td>
                     <td>
                         <button class="btn btn-primary btn-sm"
                             onclick='showReportModal(
-                                @json($report["imageBase64"] ?? ""),
-                                @json($report["message"] ?? ""),
-                                @json(isset($report["timestamp"]) ? date("Y-m-d H:i:s", $report["timestamp"]/1000) : "")
+                                @json($imageBase64),
+                                @json($condition),
+                                @json($remedy),
+                                @json($message),
+                                @json($timestamp)
                             )'>
                             View
                         </button>
                     </td>
-                    <td>{{ isset($report['timestamp']) ? date('Y-m-d H:i:s', $report['timestamp']/1000) : '' }}</td>
+                    <td>{{ $timestamp }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="3" class="text-center">No scan reports found.</td>
+                    <td colspan="4" class="text-center">No scan reports found.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -43,11 +57,13 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Scan Report</h5>
+        <h5 class="modal-title">Scan Report Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center">
         <img id="reportImage" src="" class="img-fluid mb-3" style="max-height: 400px;">
+        <p><strong>Condition:</strong> <span id="reportCondition"></span></p>
+        <p><strong>Remedy:</strong> <span id="reportRemedy"></span></p>
         <p><strong>Message:</strong> <span id="reportMessage"></span></p>
         <p><strong>Timestamp:</strong> <span id="reportTimestamp"></span></p>
       </div>
@@ -56,11 +72,13 @@
 </div>
 
 <script>
-function showReportModal(imageBase64, message, timestamp) {
+function showReportModal(imageBase64, condition, remedy, message, timestamp) {
     document.getElementById('reportImage').src = imageBase64 
         ? 'data:image/jpeg;base64,' + imageBase64 
         : '';
-    document.getElementById('reportMessage').textContent = message || 'No message';
+    document.getElementById('reportCondition').textContent = condition || 'N/A';
+    document.getElementById('reportRemedy').textContent = remedy || 'N/A';
+    document.getElementById('reportMessage').textContent = message || 'N/A';
     document.getElementById('reportTimestamp').textContent = timestamp || 'N/A';
 
     new bootstrap.Modal(document.getElementById('reportModal')).show();
