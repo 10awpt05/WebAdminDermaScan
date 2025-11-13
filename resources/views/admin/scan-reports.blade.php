@@ -18,7 +18,7 @@
             @forelse($scanReports as $reportId => $report)
                 @php
                     $scanResult = $report['scanResult'] ?? [];
-                    $userName = $scanResult['userName'] ?? 'Unknown';
+                    $userName = $report['userName'] ?? 'Unknown';
                     $condition = $scanResult['condition'] ?? 'No condition';
                     $imageBase64 = $scanResult['imageBase64'] ?? '';
                     $remedy = $scanResult['remedy'] ?? '';
