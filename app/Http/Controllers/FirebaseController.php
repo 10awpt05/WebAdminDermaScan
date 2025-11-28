@@ -66,7 +66,8 @@ class FirebaseController extends Controller
     public function deleteUser($id)
     {
         $this->database->getReference("userInfo/{$id}")->remove();
-        return redirect()->route('user.list')->with('success', 'User deleted successfully!');
+        return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+
     }
 
     public function show($postId)
