@@ -45,9 +45,14 @@
                 <td>{{ $user['quote'] ?? 'N/A' }}</td>
                 <td>{{ $user['bio'] ?? 'N/A' }}</td>
                 <td>
-                    <a href="{{ route('user.delete', $user['id']) }}"
-                       onclick="return confirm('Are you sure you want to delete this user?')"
-                       class="btn btn-sm btn-danger">Delete</a>
+                    <form action="{{ route('user.delete', $id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this user?')">
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>
         @empty
