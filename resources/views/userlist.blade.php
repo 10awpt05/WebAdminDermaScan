@@ -45,7 +45,7 @@
                 <td>{{ $user['quote'] ?? 'N/A' }}</td>
                 <td>{{ $user['bio'] ?? 'N/A' }}</td>
                 <td>
-                    <form action="{{ route('user.delete', $id) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('user.delete', $user['id']) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger"
@@ -54,6 +54,7 @@
                         </button>
                     </form>
                 </td>
+
             </tr>
         @empty
             <tr>
