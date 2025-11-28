@@ -113,56 +113,86 @@
 
   <!-- Firebase (Modular v9) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onChildChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, onChildAdded, onChildChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCp6DYZt1zT-qzdx6SZ5H5D9EZLme5kGE0",
-      authDomain: "dermascan-web-admin.onrender.com",
-      databaseURL: "https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "dermascanai-2d7a1",
-      storageBucket: "dermascanai-2d7a1.appspot.com",
-      messagingSenderId: "889758966173",
-      appId: "1:889758966173:web:c1523dc49921e882f30f74",
-      measurementId: "G-QBF39K0J8V"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCp6DYZt1zT-qzdx6SZ5H5D9EZLme5kGE0",
+    authDomain: "dermascan-web-admin.onrender.com",
+    databaseURL: "https://dermascanai-2d7a1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "dermascanai-2d7a1",
+    storageBucket: "dermascanai-2d7a1.appspot.com",
+    messagingSenderId: "889758966173",
+    appId: "1:889758966173:web:c1523dc49921e882f30f74",
+    measurementId: "G-QBF39K0J8V"
+  };
 
-    // ✅ Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    function handleUpdate(type, uid, data) {
-      // 🔔 Play sound
-      document.getElementById('dingSound').play();
+  function showNotification(type, uid, data) {
+    // 🔔 Ding
+    document.getElementById('dingSound').play();
 
-      // ✅ Show Toast
-      document.getElementById('toastMessage').innerText = `${type} updated (ID: ${uid})`;
-      const toast = new bootstrap.Toast(document.getElementById('liveToast'));
-      toast.show();
+    // Toast message
+    document.getElementById('toastMessage').innerText = `New ${type} added! (ID: ${uid})`;
+    const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+    toast.show();
 
-      // ✅ Also show modal with details
-      const modalBody = document.getElementById('popupModalBody');
-      modalBody.innerHTML = `
-        <h5>Update in <span class="text-success">${type}</span></h5>
-        <p><strong>ID:</strong> ${uid}</p>
-        <pre>${JSON.stringify(data, null, 2)}</pre>
-      `;
-      const modal = new bootstrap.Modal(document.getElementById('popupModal'));
-      modal.show();
-    }
+    // Modal
+    const modalBody = document.getElementById('popupModalBody');
+    modalBody.innerHTML = `
+      <h5 class="text-success">New ${type} Added</h5>
+      <p><strong>ID:</strong> ${uid}</p>
+      <pre>${JSON.stringify(data, null, 2)}</pre>
+    `;
+    new bootstrap.Modal(document.getElementById('popupModal')).show();
+  }
 
-    // 🔹 Listen for updates
-    onChildChanged(ref(db, "clinicInfo"), (snapshot) => {
-      handleUpdate("Clinic Info", snapshot.key, snapshot.val());
-    });
+  function showUpdate(type, uid, data) {
+    document.getElementById('toastMessage').innerText = `${type} updated (ID: ${uid})`;
+    const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+    toast.show();
 
-    onChildChanged(ref(db, "scanReports"), (snapshot) => {
-      handleUpdate("Scan Report", snapshot.key, snapshot.val());
-    });
+    const modalBody = document.getElementById('popupModalBody');
+    modalBody.innerHTML = `
+      <h5 class="text-warning">${type} Updated</h5>
+      <p><strong>ID:</strong> ${uid}</p>
+      <pre>${JSON.stringify(data, null, 2)}</pre>
+    `;
+    new bootstrap.Modal(document.getElementById('popupModal')).show();
+  }
 
-    onChildChanged(ref(db, "userInfo"), (snapshot) => {
-      handleUpdate("User Info", snapshot.key, snapshot.val());
-    });
-  </script>
+  // ----------------------------------------------------
+  // 🔹 NEW RECORDS (Triggers when a new child is added)
+  // ----------------------------------------------------
+  onChildAdded(ref(db, "userInfo"), (snapshot) => {
+    showNotification("User Info", snapshot.key, snapshot.val());
+  });
+
+  onChildAdded(ref(db, "clinicInfo"), (snapshot) => {
+    showNotification("Clinic Info", snapshot.key, snapshot.val());
+  });
+
+  onChildAdded(ref(db, "scanReports"), (snapshot) => {
+    showNotification("Scan Report", snapshot.key, snapshot.val());
+  });
+
+  // ----------------------------------------------------
+  // 🔹 EXISTING RECORDS UPDATED (Optional)
+  // ----------------------------------------------------
+  onChildChanged(ref(db, "userInfo"), (snapshot) => {
+    showUpdate("User Info", snapshot.key, snapshot.val());
+  });
+
+  onChildChanged(ref(db, "clinicInfo"), (snapshot) => {
+    showUpdate("Clinic Info", snapshot.key, snapshot.val());
+  });
+
+  onChildChanged(ref(db, "scanReports"), (snapshot) => {
+    showUpdate("Scan Report", snapshot.key, snapshot.val());
+  });
+</script>
+
 </body>
 </html>
