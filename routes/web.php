@@ -29,7 +29,7 @@ Route::delete('/diseases/{name}', [DiseaseController::class, 'destroy'])->name('
 
 Route::get('/admin/derma-users', [AdminController::class, 'showDermaUsers'])->name('admin.derma-users');
 Route::post('/admin/verify-user/{uid}', [AdminController::class, 'verifyUser'])->name('admin.verify-user');
-Route::delete('/user/delete/{id}', [FirebaseController::class, 'deleteUser'])->name('user.delete');
+Route::get('/admin/delete-user/{uid}', [AdminController::class, 'deleteUser'])->name('admin.delete-user');
 Route::post('/admin/reject-user/{uid}', [AdminController::class, 'rejectUser'])->name('admin.reject-user');
 Route::get('/admin/user-image/{uid}/{type}', [AdminController::class, 'getImage'])->name('admin.get-image');
 
@@ -56,8 +56,7 @@ Route::get('/userlist', [FirebaseController::class, 'listUsers'])->name('users.i
 
 Route::get('/user/edit/{id}', [FirebaseController::class, 'editUser'])->name('user.edit');
 Route::post('/user/update/{id}', [FirebaseController::class, 'updateUser'])->name('user.update');
-Route::get('/user/delete/{id}', [FirebaseController::class, 'deleteUser'])->name('user.delete');
-
+Route::delete('/user/delete/{id}', [FirebaseController::class, 'deleteUser'])->name('user.delete');
 
 
 Route::get('/mainapp', function () {
